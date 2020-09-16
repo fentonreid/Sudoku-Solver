@@ -8,11 +8,19 @@ class square():
         self.height = height
         self.colour = colour
         self.window = window
-        self.text = ""
+        self.text = "0"
+        self.changeable = True
+        self.row = None
+        self.column = None
+        self.answer = 0
 
     def createRect(self):
         pygame.draw.rect(self.window, self.colour, (self.x,self.y,self.width,self.height), 1)
 
+    def createLine(self, start, end):
+        pygame.draw.line(self.window, self.colour, start, end, 5)
+
     def updateLabel(self):
-        label = pygame.font.SysFont("comicsans", 40).render(self.text, 10, (0, 0, 0))
-        self.window.blit(label, (self.x, self.y))
+        if self.text != "0":
+            label = pygame.font.SysFont("comicsans", 40).render(self.text, 1, (0,0,0))
+            self.window.blit(label, (self.x, self.y))
