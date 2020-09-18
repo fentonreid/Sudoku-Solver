@@ -5,16 +5,14 @@ Sudoku Solver was created using pygame. It allows for backtracking and playing o
 Run sudoku solver using the main.py file.
 
 ## Installation
-You need pygame 
+You need pygame and pygame_menu installed to use sudoku solver
+
 ```python
 import pygame
 ```
-and pygame_menu
 ```python
 import pygame_menu
 ```
-installed to use sudoku solver
-
 
 ## Instructions
 Click on a square and enter a number from 1 to 9 to add that number to square. To solve the sudoku board press SPACE.
