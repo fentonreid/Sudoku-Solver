@@ -1,23 +1,49 @@
 import pygame
 import random
+from time import sleep
+import tkinter as tk
+from tkinter import ttk
+
 from board import board
 
+
 def run(diff):
+    """
+    Runs the sudoku board game after start is pressed from the main.py file
+
+    :param diff: the difficulty the user wants the sudoku game to be
+    :return: None
+    """
+
     pygame.init()
 
     difficulty = diff
+    screenshotTaken = False
+
+    # setup the pygame window
     width = 500
     height = 500
 
+    # add an icon and title
     window = pygame.display.set_mode((width, height))
     icon = pygame.image.load("sudokuIcon.png")
     pygame.display.set_icon(icon)
     pygame.display.set_caption("Sudoku Solver")
 
+    # setup the clock
     clock = pygame.time.Clock()
+    initialTime = pygame.time.get_ticks()
 
-    # checks if the user chosen number is valid in the specified row and column of the sudoku board
     def placeable(grid, row, column, number):
+        """
+        checks if the user chosen number is valid in the specified row and column of the sudoku board
+
+        :param grid: the 2d array that contains all the information on the sudoku board
+        :param row: row integer
+        :param column: column integer
+        :param number: number the user choose to place on the board
+        :return: true if placeable on the board else false
+        """
         numberSet = set()
         # get all numbers in a row
         for i in range(9):
@@ -36,6 +62,12 @@ def run(diff):
         return number not in numberSet
 
     def getEmpty(grid):
+        """
+        Returns the location of the empty space as a tuple of size 2 {row, column} or None if no empties found
+
+        :param grid: the 2d array that contains all the information on the sudoku board
+        :return: Location of the empty space or None if no empties
+        """
         for i in grid:
             for j in i:
                 if grid[j.row][j.column].text == "0":
@@ -44,6 +76,11 @@ def run(diff):
         return None
 
     def createSudokuBoard():
+        """
+        Returns a solveable sudoku board with a certain number of empty tiles based on the difficulty the user choose
+
+        :return: a sudoku board with numbers filled in based on user chosen difficulty
+        """
         numberToGenerate = 0
 
         # defining a number of numbers to generate from the users input of difficulty
@@ -72,10 +109,6 @@ def run(diff):
         for x, (i, j) in enumerate(topRightBox):
             grid.grid[i][j].text = str(topRightList[x])
 
-        # OTHERWISE THIS WON'T WORK
-        # NEED TO WRITE CODE TO FILL IN TOP-MID AND TOP-RIGHT BOXES
-        # OTHERWISE THIS WON'T WORK
-
         # BACKTRACK TO SOLVE
         backtrackSolver(grid.grid)
 
@@ -93,6 +126,12 @@ def run(diff):
         return grid.grid
 
     def backtrackSolver(grid):
+        """
+        Recursively place a 1 to 9 in an empty square until the board is completed
+
+        :param grid: the 2d array that contains all the information on the sudoku board
+        :return: True or false
+        """
         # function that checks whether there are still empty tiles
         getEmptyLocation = getEmpty(grid)
         if getEmptyLocation is None:
@@ -103,13 +142,11 @@ def run(diff):
         for i in range(9):
             if placeable(grid, row, column, i + 1):
                 grid[row][column].text = str(i + 1)
-                grid[row][column].colour = (0, 255, 0)
 
                 if backtrackSolver(grid):
                     return True
 
         grid[row][column].text = "0"
-        grid[row][column].colour = (255, 0, 0)
         return False
 
     premade = createSudokuBoard()
@@ -157,12 +194,46 @@ def run(diff):
 
             keyPressed = 0
 
+        # check for win condition and display information in a popup
+        getEmptyLocation = getEmpty(grid.grid)
+        if getEmptyLocation is None:
+            grid.redrawBoard()
+            pygame.display.update()
+
+            endScreen = tk.Tk()
+            endScreen.title("Board filled")
+            endScreen.geometry("300x300")
+            endScreen.configure(background="cyan")
+            ttk.Label(endScreen, background="cyan", font=('Helvetica', 18, 'bold'),
+                      text="Sudoku board complete: \n\n -You took " + str(
+                          (pygame.time.get_ticks() - initialTime) // 1000) + "s \n" + " -You made " + str(
+                          wrong) + " mistake(s)").pack()
+
+            def screenshot():
+                """Allows the user to save the board
+                """
+                # take a screenshot of the completed board
+                pygame.image.save(window, "screenshots/board.png")
+                sleep(3)
+                endScreen.destroy()
+
+            running = False
+
+            a = ttk.Button(endScreen, text="Take a screenshot", command=screenshot).pack()
+            ttk.Button(endScreen, text="Close game", command= endScreen.destroy).pack()
+            endScreen.mainloop()
+
         # clear the screen each frame
         window.fill((255, 255, 255))
 
         # draw the number of wrong guesses the user has
-        wrongLabel = pygame.font.SysFont("comicsans", 40).render("Wrong: " + str(wrong), 1, (0, 0, 0))
-        window.blit(wrongLabel, (350, 0))
+        wrongLabel = pygame.font.SysFont("comicsans", 25).render("Wrong: " + str(wrong), 1, (0, 0, 0))
+        window.blit(wrongLabel, (405, 0))
+
+        # draw the time elapsed onto the screen
+        time = pygame.font.SysFont("comicsans", 25).render(
+            "Time: " + (str((pygame.time.get_ticks() - initialTime) // 1000) + "s"), 1, (0, 0, 0))
+        window.blit(time, (10, 0))
 
         # redraw the board with the latest information
         grid.redrawBoard()
@@ -173,8 +244,3 @@ def run(diff):
 
     # close pygame
     pygame.quit()
-
-
-run("Easy")
-
-# thanks to icons8.com for the sudoku logo
