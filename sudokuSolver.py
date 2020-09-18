@@ -213,7 +213,7 @@ def run(diff):
                 """Allows the user to save the board
                 """
                 # take a screenshot of the completed board
-                pygame.image.save(window, "screenshots/board.png")
+                pygame.image.save(window, "board.png")
                 sleep(3)
                 endScreen.destroy()
 
